@@ -199,5 +199,9 @@ def get_cbz(filename):
         return serve_and_clean(path)
     return "Archivo no encontrado"
 
+import os
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
+
