@@ -7,8 +7,8 @@ DOWNLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'downloads')
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
 # Direcciones base para dl1 y dl2
-DL1_BASE = "http://nhentai.net/g"
-DL2_BASE = "http://es.3hentai.net/d"
+DL1_BASE = "https://nhentai.net/g"
+DL2_BASE = "https://es.3hentai.net/d"
 
 def sanitize(name):
     return re.sub(r'[\\/*?:"<>|]', '', name)
@@ -92,6 +92,7 @@ def serve_and_clean(filepath):
 def index():
     html = """
     <html><body style="font-family:sans-serif;text-align:center;margin-top:50px;">
+    <h1>Pagina web simple para descargara Mangas Hentai como CBZ</h1>
     <h2>Nhentai</h2>
     <form action="/dl1"><input name="code" placeholder="Código"><input type="submit" value="Descargar"></form>
     <h2>3Hentai DL</h2>
@@ -100,11 +101,12 @@ def index():
     <form action="/dl1m"><input name="codes" placeholder="123,456"><input type="submit" value="Descargar múltiple"></form>
     <h2>3Hentai DL (Split ",")</h2>
     <form action="/dl2m"><input name="codes" placeholder="789,321"><input type="submit" value="Descargar múltiple"></form>
+    <p>Codigo: <a>https://github.com/nakigeplayer/hentai-dl-web/</a></p>
     </body></html>
     """
     return render_template_string(html)
 
-@app.route("/dl1")
+@app.route("/dl1/<code>")
 def dl1():
     code = request.args.get("code", "").strip()
     url = f"{DL1_BASE}/{code}"
@@ -114,7 +116,7 @@ def dl1():
     cbz_path = create_cbz(title, code, images)
     return serve_and_clean(cbz_path)
 
-@app.route("/dl2")
+@app.route("/dl2/<code>")
 def dl2():
     code = request.args.get("code", "").strip()
     url = f"{DL2_BASE}/{code}"
@@ -124,7 +126,7 @@ def dl2():
     cbz_path = create_cbz(title, code, images)
     return serve_and_clean(cbz_path)
 
-@app.route("/dl1m")
+@app.route("/dl1m/<codes>")
 def dl1m():
     codes = request.args.get("codes", "").strip().split(",")
     links = []
@@ -139,7 +141,7 @@ def dl1m():
         return "No se generó ningún archivo."
     return render_template_string(f"<ul>{''.join(links)}</ul>")
 
-@app.route("/dl2m")
+@app.route("/dl2m/<codes>")
 def dl2m():
     codes = request.args.get("codes", "").strip().split(",")
     links = []
