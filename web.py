@@ -20,6 +20,19 @@ def extract_title(html_text):
         return sanitize(html.unescape(title_tag.text.strip()))
     return "SinTítulo"
 
+def render_download_status(filename):
+    return render_template_string(f"""
+    <html><body style='font-family:sans-serif;text-align:center;margin-top:50px;'>
+    <h2 id='status'>Descargando archivo...</h2>
+    <script>
+        setTimeout(() => {{
+            document.getElementById('status').innerText = "Archivo descargado exitosamente, acepte la descarga en su navegador para guardar.";
+            window.location.href = "/get/{filename}";
+        }}, 2000);
+    </script>
+    </body></html>
+    """)
+
 def fetch_images(base_url):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
@@ -106,7 +119,7 @@ def index():
     """
     return render_template_string(html)
 
-@app.route("/dl1/<code>")
+@app.route("/dl1")
 def dl1():
     code = request.args.get("code", "").strip()
     url = f"{DL1_BASE}/{code}"
@@ -114,9 +127,9 @@ def dl1():
     if not images:
         return f"No se encontraron imágenes en {url}"
     cbz_path = create_cbz(title, code, images)
-    return serve_and_clean(cbz_path)
+    return render_download_status(os.path.basename(cbz_path))
 
-@app.route("/dl2/<code>")
+@app.route("/dl2")
 def dl2():
     code = request.args.get("code", "").strip()
     url = f"{DL2_BASE}/{code}"
@@ -124,9 +137,9 @@ def dl2():
     if not images:
         return f"No se encontraron imágenes en {url}"
     cbz_path = create_cbz(title, code, images)
-    return serve_and_clean(cbz_path)
+    return render_download_status(os.path.basename(cbz_path))
 
-@app.route("/dl1m/<codes>")
+@app.route("/dl1m")
 def dl1m():
     codes = request.args.get("codes", "").strip().split(",")
     links = []
@@ -136,12 +149,19 @@ def dl1m():
         title, images = fetch_images(url)
         if images:
             cbz = create_cbz(title, code, images)
-            links.append(f"<li><a href='/get/{os.path.basename(cbz)}'>{os.path.basename(cbz)}</a></li>")
+            links.append(os.path.basename(cbz))
     if not links:
         return "No se generó ningún archivo."
-    return render_template_string(f"<ul>{''.join(links)}</ul>")
+    return render_template_string(f"""
+    <html><body style='font-family:sans-serif;text-align:center;margin-top:50px;'>
+    <h2>Archivos listos:</h2>
+    <ul>
+    {''.join(f"<li><a href='/get/{f}'>{f}</a></li>" for f in links)}
+    </ul>
+    </body></html>
+    """)
 
-@app.route("/dl2m/<codes>")
+@app.route("/dl2m")
 def dl2m():
     codes = request.args.get("codes", "").strip().split(",")
     links = []
@@ -151,10 +171,17 @@ def dl2m():
         title, images = fetch_images(url)
         if images:
             cbz = create_cbz(title, code, images)
-            links.append(f"<li><a href='/get/{os.path.basename(cbz)}'>{os.path.basename(cbz)}</a></li>")
+            links.append(os.path.basename(cbz))
     if not links:
         return "No se generó ningún archivo."
-    return render_template_string(f"<ul>{''.join(links)}</ul>")
+    return render_template_string(f"""
+    <html><body style='font-family:sans-serif;text-align:center;margin-top:50px;'>
+    <h2>Archivos listos:</h2>
+    <ul>
+    {''.join(f"<li><a href='/get/{f}'>{f}</a></li>" for f in links)}
+    </ul>
+    </body></html>
+    """)
 
 @app.route("/direct/<source>/<codes>")
 def direct_download(source, codes):
