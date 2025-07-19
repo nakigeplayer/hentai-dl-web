@@ -214,7 +214,7 @@ def dl2m(codes=None):
     </body></html>
     """)
 
-
+@app.route("/direct/<source>/g/<codes>")
 @app.route("/direct/<source>/<codes>")
 def direct_download(source, codes):
     # Define base según la fuente
