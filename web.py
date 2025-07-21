@@ -143,7 +143,7 @@ def dl1(code=None):
 def dl1m(codes=None):
     if codes is None:
         codes = request.args.get("codes", "")
-    code_list = [c.strip() for c in codes.split(",") if c.strip()]
+    code_list = [c.strip() for c in codes.split(" ") if c.strip()]
     if not code_list:
         return "No se especificó ningún código."
 
@@ -190,7 +190,7 @@ def dl2(code=None):
 def dl2m(codes=None):
     if codes is None:
         codes = request.args.get("codes", "")
-    code_list = [c.strip() for c in codes.split(",") if c.strip()]
+    code_list = [c.strip() for c in codes.split(" ") if c.strip()]
     if not code_list:
         return "No se especificó ningún código."
 
